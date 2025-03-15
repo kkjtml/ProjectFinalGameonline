@@ -17,6 +17,8 @@ public class LoginManagerScipt : MonoBehaviour
     public GameObject loginPanel;
     public GameObject leaveButton;
     public List<GameObject> spawnPoint = new List<GameObject>();
+    // เพิ่ม property เพื่อให้สามารถเข้าถึง lastSpawnPosition ได้
+    public Vector3 lastSpawnPosition { get; private set; } // ทำให้สามารถอ่านค่าได้
     public List<uint> AlternatePlayerPrefebs;
 
     public GameObject scorePanel;
@@ -67,7 +69,7 @@ public class LoginManagerScipt : MonoBehaviour
             leaveButton.SetActive(true);
             scorePanel.SetActive(false);
 
-            joinCodeDisplayText.gameObject.SetActive(true); 
+            joinCodeDisplayText.gameObject.SetActive(true);
             joinCodeInputField.gameObject.SetActive(false);
         }
     }
@@ -262,18 +264,36 @@ public class LoginManagerScipt : MonoBehaviour
         Vector3 spawnPos = Vector3.zero;
         Quaternion spawnRot = Quaternion.identity;
 
+        // ถ้าคือผู้เล่นที่เราเป็นเจ้าของ
         if (clientID == NetworkManager.Singleton.LocalClientId)
         {
-            GameObject spawnPointNow = SelectSpawn();
-            spawnPos = spawnPointNow.transform.position;
-            spawnRot = Quaternion.Euler(0f, 225f, 0f);
+            // ถ้ายังไม่มีการเก็บตำแหน่งเกิด
+            if (lastSpawnPosition == Vector3.zero)
+            {
+                // เลือกตำแหน่งเกิดใหม่
+                GameObject spawnPointNow = SelectSpawn();
+                spawnPos = spawnPointNow.transform.position;
+                spawnRot = Quaternion.Euler(0f, 225f, 0f);
+
+                // เก็บตำแหน่งเกิดไว้สำหรับการเกิดครั้งถัดไป
+                lastSpawnPosition = spawnPos;
+                lastSpawnPosition = spawnPos; // เก็บตำแหน่ง spawn
+            }
+            else
+            {
+                // ใช้ตำแหน่งเกิดล่าสุด
+                spawnPos = lastSpawnPosition;
+                lastSpawnPosition = spawnPos; // เก็บตำแหน่ง spawn
+            }
         }
         else
         {
+            // สำหรับผู้เล่นคนอื่น ๆ
             GameObject spawnPointNow = SelectSpawn();
             spawnPos = spawnPointNow.transform.position;
             spawnRot = Quaternion.Euler(0f, 225f, 0f);
         }
+
         response.Position = spawnPos;
         response.Rotation = spawnRot;
     }

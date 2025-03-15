@@ -18,6 +18,8 @@ public class HPPlayerScript : NetworkBehaviour
 
     private OwnerNetworkAnimationScript ownerNetworkAnimationScript;
 
+    private Vector3 spawnPosition; //เก็บตำแหน่ง spawn
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +27,8 @@ public class HPPlayerScript : NetworkBehaviour
         p2Text = GameObject.Find("P2HPText (TMP)").GetComponent<TMP_Text>();
         mainPlayer = GetComponent<MainPlayerMovement>();
         ownerNetworkAnimationScript = GetComponent<OwnerNetworkAnimationScript>();
+
+        spawnPosition = transform.position; // เก็บตำแหน่ง spawn เริ่มต้น
     }
 
     private void UpdatePlayerNameAndScore()
@@ -65,21 +69,31 @@ public class HPPlayerScript : NetworkBehaviour
         {
             if (IsOwnedByServer)
             {
-                hpP1.Value--;
-                if (hpP1.Value <= 0)
+                // เช็คว่า hpP1 ลดลงได้จริง
+                if (hpP1.Value > 0)
                 {
-                    ownerNetworkAnimationScript.SetTrigger("Dead");
+                    hpP1.Value--;
+                    ownerNetworkAnimationScript.SetTrigger("Hurt");
+                    if (hpP1.Value <= 0)
+                    {
+                        ownerNetworkAnimationScript.SetTrigger("Dead");
+                        RespawnPlayer();  // เรียก respawn เมื่อ HP = 0
+                    }
                 }
-                ownerNetworkAnimationScript.SetTrigger("Hurt");
             }
             else
             {
-                hpP2.Value--;
-                if (hpP2.Value <= 0)
+                // เช็คว่า hpP2 ลดลงได้จริง
+                if (hpP2.Value > 0)
                 {
-                    ownerNetworkAnimationScript.SetTrigger("Dead");
+                    hpP2.Value--;
+                    ownerNetworkAnimationScript.SetTrigger("Hurt");
+                    if (hpP2.Value <= 0)
+                    {
+                        ownerNetworkAnimationScript.SetTrigger("Dead");
+                        RespawnPlayer();  // เรียก respawn เมื่อ HP = 0
+                    }
                 }
-                ownerNetworkAnimationScript.SetTrigger("Hurt");
             }
         }
         else if (collision.gameObject.tag == "Heart")
@@ -95,5 +109,24 @@ public class HPPlayerScript : NetworkBehaviour
                 ownerNetworkAnimationScript.SetTrigger("Glad");
             }
         }
+    }
+
+    public void RespawnPlayer()  //ฟังก์ชันให้ผู้เล่น respawn ที่ตำแหน่งที่เคยเกิด
+    {
+        Vector3 spawnPos = LoginManagerScipt.Instance.lastSpawnPosition;  // Retrieve spawn position from LoginManager
+        transform.position = spawnPosition;
+
+        // รีเซ็ตค่า HP ให้กลับไปเป็น 5
+        if (IsOwnedByServer)
+        {
+            hpP1.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 1
+        }
+        else
+        {
+            hpP2.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 2
+        }
+
+        // หยุดแอนิเมชัน "Dead" ถ้า HP มากกว่า 0
+        ownerNetworkAnimationScript.ResetTrigger("Dead");
     }
 }
