@@ -28,6 +28,7 @@ public class HPPlayerScript : NetworkBehaviour
         mainPlayer = GetComponent<MainPlayerMovement>();
         ownerNetworkAnimationScript = GetComponent<OwnerNetworkAnimationScript>();
 
+
         spawnPosition = transform.position; // เก็บตำแหน่ง spawn เริ่มต้น
     }
 
@@ -101,7 +102,41 @@ public class HPPlayerScript : NetworkBehaviour
         }
     }
 
-    [ServerRpc]
+    public void RespawnPlayer() // ฟังก์ชันให้ผู้เล่น respawn ที่ตำแหน่งที่เคยเกิด
+    {
+        Vector3 spawnPos = LoginManagerScipt.Instance.lastSpawnPosition;  // Retrieve spawn position from LoginManager
+        transform.position = spawnPos; // รีเซ็ตตำแหน่งผู้เล่น
+
+        // รีเซ็ตค่า HP ให้กลับไปเป็น 5
+        if (IsOwnedByServer)
+        {
+            hpP1.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 1
+        }
+        else
+        {
+            hpP2.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 2
+        }
+
+        // หยุดแอนิเมชัน "Dead" ถ้า HP มากกว่า 0
+        ownerNetworkAnimationScript.ResetTrigger("Dead");
+    }
+
+    [ClientRpc]
+    public void UpdateHPClientRpc(int playerId, int newHP)
+    {
+        if (playerId == 1)
+        {
+            hpP1.Value = newHP;
+            p1Text.text = $"{mainPlayer.playerNameA.Value} : {hpP1.Value}";
+        }
+        else
+        {
+            hpP2.Value = newHP;
+            p2Text.text = $"{mainPlayer.playerNameB.Value} : {hpP2.Value}";
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
     void DecreaseHPServerRpc(int damage, bool isPlayer1)
     {
         if (isPlayer1)
@@ -122,24 +157,6 @@ public class HPPlayerScript : NetworkBehaviour
                 RespawnPlayer();
             }
         }
-    }
-
-    public void RespawnPlayer() // ฟังก์ชันให้ผู้เล่น respawn ที่ตำแหน่งที่เคยเกิด
-    {
-        Vector3 spawnPos = LoginManagerScipt.Instance.lastSpawnPosition;  // Retrieve spawn position from LoginManager
-        transform.position = spawnPos; // รีเซ็ตตำแหน่งผู้เล่น
-
-        // รีเซ็ตค่า HP ให้กลับไปเป็น 5
-        if (IsOwnedByServer)
-        {
-            hpP1.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 1
-        }
-        else
-        {
-            hpP2.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 2
-        }
-
-        // หยุดแอนิเมชัน "Dead" ถ้า HP มากกว่า 0
-        ownerNetworkAnimationScript.ResetTrigger("Dead");
+        UpdateHPClientRpc(isPlayer1? 1 : 2, isPlayer1? hpP1.Value : hpP2.Value);
     }
 }
