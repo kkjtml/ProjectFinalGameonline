@@ -2859,15 +2859,15 @@ MonoBehaviour:
   spawnPoint:
   - {fileID: 128748015}
   - {fileID: 1699349421}
-  lastSpawnPosition:
-    m_InternalValue: {x: 0, y: 0, z: 0}
-  AlternatePlayerPrefebs: 69473c23cb849cb1ddf5a894e8897802ebab3d90
+  AlternatePlayerPrefebs: 69473c23cb849cb1
   scorePanel: {fileID: 1356290831}
   ipAddress: 127.0.0.1
   ipInputField: {fileID: 1897447087}
   joinCodeInputField: {fileID: 529049761}
   joinCode: 
   joinCodeDisplayText: {fileID: 2111581424}
+  hostCamera: {fileID: 0}
+  clientCamera: {fileID: 0}
 --- !u!4 &1052090797
 Transform:
   m_ObjectHideFlags: 0
@@ -3060,12 +3060,6 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Moonlight
-      m_Image: {fileID: 0}
-    - m_Text: Colorful
-      m_Image: {fileID: 0}
-    - m_Text: Rainbow
-      m_Image: {fileID: 0}
     - m_Text: Girl
       m_Image: {fileID: 0}
     - m_Text: Woman
@@ -3556,7 +3550,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Moonlight
+  m_text: Girl
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
