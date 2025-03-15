@@ -17,7 +17,6 @@ public class LoginManagerScipt : MonoBehaviour
     public GameObject loginPanel;
     public GameObject leaveButton;
     public List<GameObject> spawnPoint = new List<GameObject>();
-    public NetworkVariable<Vector3> lastSpawnPosition = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public List<uint> AlternatePlayerPrefebs;
 
     public GameObject scorePanel;
@@ -270,8 +269,6 @@ public class LoginManagerScipt : MonoBehaviour
             GameObject spawnPointNow = spawnPoint[0];
             spawnPos = spawnPointNow.transform.position;
             spawnRot = Quaternion.Euler(0f, 225f, 0f); // Use your desired rotation
-
-            lastSpawnPosition.Value = spawnPos; // Store spawn position for host
         }
         else
         {
@@ -285,53 +282,9 @@ public class LoginManagerScipt : MonoBehaviour
         response.Rotation = spawnRot;
     }
 
-    // ฟังก์ชันตรวจสอบว่าตำแหน่งถูกใช้งานแล้วหรือไม่
-    private bool IsSpawnPositionOccupied(Vector3 position)
-    {
-        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-        {
-            if (client.PlayerObject != null)
-            {
-                Vector3 playerPosition = client.PlayerObject.transform.position;
-                // ถ้าผู้เล่นคนอื่นอยู่ที่ตำแหน่งเดียวกันกับตำแหน่ง spawn
-                if (Vector3.Distance(playerPosition, position) < 1f)  // ระยะห่าง 1 หน่วย
-                {
-                    return true;  // ตำแหน่งถูกใช้แล้ว
-                }
-            }
-        }
-        return false;  // ตำแหน่งยังไม่ถูกใช้
-    }
-
-    private GameObject SelectSpawn()
-    {
-        int random = Random.Range(0, spawnPoint.Count);
-        return spawnPoint[random];
-    }
-
     public int SelectColor()
     {
-        if (characterSelect.GetComponent<TMP_Dropdown>().value == 0)
-        {
-            return 0;
-        }
-        else if (characterSelect.GetComponent<TMP_Dropdown>().value == 1)
-        {
-            return 1;
-        }
-        else if (characterSelect.GetComponent<TMP_Dropdown>().value == 2)
-        {
-            return 2;
-        }
-        else if (characterSelect.GetComponent<TMP_Dropdown>().value == 3)
-        {
-            return 3;
-        }
-        else if (characterSelect.GetComponent<TMP_Dropdown>().value == 4)
-        {
-            return 4;
-        }
-        return 0;
+        return characterSelect.value;
     }
 
     public void UpdateJoinCodeDisplay(string joinCode)

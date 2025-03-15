@@ -2859,7 +2859,9 @@ MonoBehaviour:
   spawnPoint:
   - {fileID: 128748015}
   - {fileID: 1699349421}
-  AlternatePlayerPrefebs: ddf5a894e8897802ebab3d9069473c23cb849cb1
+  lastSpawnPosition:
+    m_InternalValue: {x: 0, y: 0, z: 0}
+  AlternatePlayerPrefebs: 69473c23cb849cb1ddf5a894e8897802ebab3d90
   scorePanel: {fileID: 1356290831}
   ipAddress: 127.0.0.1
   ipInputField: {fileID: 1897447087}
