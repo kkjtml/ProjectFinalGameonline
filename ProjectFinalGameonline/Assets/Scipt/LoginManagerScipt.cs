@@ -30,6 +30,10 @@ public class LoginManagerScipt : MonoBehaviour
     public string joinCode;
     public TMP_Text joinCodeDisplayText;
 
+    // กล้องตาม Player
+    public GameObject hostPlayer;
+    public GameObject clientPlayer;
+
     private void Awake()
     {
         if (Instance == null)
@@ -93,6 +97,9 @@ public class LoginManagerScipt : MonoBehaviour
             // loginPanel.SetActive(false);
             // leaveButton.SetActive(true);
             SetUIVisable(true);
+
+            // ดึงตัวละครที่เพิ่ง Spawn แล้วตั้งค่าให้กล้อง
+            StartCoroutine(SetCameraToPlayer());
         }
 
     }
@@ -268,6 +275,8 @@ public class LoginManagerScipt : MonoBehaviour
             GameObject spawnPointNow = spawnPoint[0];
             spawnPos = spawnPointNow.transform.position;
             spawnRot = Quaternion.Euler(0f, 225f, 0f); // Use your desired rotation
+
+            hostPlayer = spawnPointNow; // กำหนด hostPlayer
         }
         else
         {
@@ -275,10 +284,15 @@ public class LoginManagerScipt : MonoBehaviour
             GameObject spawnPointNow = spawnPoint[1];
             spawnPos = spawnPointNow.transform.position;
             spawnRot = Quaternion.Euler(0f, 225f, 0f); // Use your desired rotation
+
+            clientPlayer = spawnPointNow; // กำหนด clientPlayer
         }
 
         response.Position = spawnPos;
         response.Rotation = spawnRot;
+
+        CameraManager.Instance.hostPlayer = hostPlayer;
+        CameraManager.Instance.clientPlayer = clientPlayer;
     }
 
     public int SelectColor()
@@ -291,6 +305,25 @@ public class LoginManagerScipt : MonoBehaviour
         if (joinCodeDisplayText != null)
         {
             joinCodeDisplayText.text = joinCode;
+        }
+    }
+
+    private IEnumerator SetCameraToPlayer()
+    {
+        yield return new WaitForSeconds(0.5f); // รอให้ Player Spawn ก่อน
+
+        if (NetworkManager.Singleton.LocalClient != null)
+        {
+            GameObject player = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().gameObject;
+            if (player != null)
+            {
+                Debug.Log("CameraManager: Player Found - Setting Camera");
+                CameraManager.Instance.SetPlayer(player);
+            }
+            else
+            {
+                Debug.LogError("CameraManager: Player Not Found!");
+            }
         }
     }
 }

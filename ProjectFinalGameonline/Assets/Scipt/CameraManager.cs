@@ -1,59 +1,80 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 using Unity.Netcode;
 
 public class CameraManager : MonoBehaviour
 {
-    public Camera hostCamera; // กล้องของ Host
-    public Camera clientCamera; // กล้องของ Client
+    public static CameraManager Instance { get; private set; }
+    public CinemachineVirtualCamera cinemachineCamera;
+    public GameObject hostPlayer;
+    public GameObject clientPlayer;
 
-    public Transform hostPlayer; // ตัวแปรที่เก็บผู้เล่นที่เป็น Host
-    public Transform clientPlayer; // ตัวแปรที่เก็บผู้เล่นที่เป็น Client
 
-    private void Start()
+    // ปรับค่ามุมกล้องแบบ Third-Person
+    public Vector3 thirdPersonOffset = new Vector3(0, 5, -8);
+    public Vector3 cameraRotation = new Vector3(30, 0, 0); // หมุนกล้องให้เงยขึ้น 30 องศา
+
+    private void Awake()
     {
-        if (NetworkManager.Singleton.IsHost)
+        if (Instance == null)
         {
-            // หากเป็น Host, เปิดกล้องของ Host และปิดกล้องของ Client
-            hostCamera.gameObject.SetActive(true);
-            clientCamera.gameObject.SetActive(false);
-
-            // ตั้งค่าผู้เล่นที่เป็น Host
-            hostPlayer = GameObject.FindWithTag("HostPlayer").transform;
+            Instance = this;
         }
-        else if (NetworkManager.Singleton.IsClient)
+        else if (Instance != this)
         {
-            // หากเป็น Client, เปิดกล้องของ Client และปิดกล้องของ Host
-            hostCamera.gameObject.SetActive(false);
-            clientCamera.gameObject.SetActive(true);
-
-            // ตั้งค่าผู้เล่นที่เป็น Client
-            clientPlayer = GameObject.FindWithTag("ClientPlayer").transform;
+            Destroy(gameObject);
         }
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (NetworkManager.Singleton.IsHost && hostPlayer != null)
         {
-            // Host camera ติดตาม Host player
-            Vector3 targetPosition = hostPlayer.position;
-            targetPosition.y += 5f; // เพิ่มความสูงให้กล้อง
-            targetPosition.z -= 10f; // กำหนดระยะห่างจากผู้เล่น
-
-            hostCamera.transform.position = targetPosition;
-            hostCamera.transform.LookAt(hostPlayer); // ให้กล้องมองผู้เล่น Host
+            SetCameraFollow(hostPlayer);
         }
         else if (NetworkManager.Singleton.IsClient && clientPlayer != null)
         {
-            // Client camera ติดตาม Client player
-            Vector3 targetPosition = clientPlayer.position;
-            targetPosition.y += 5f; // เพิ่มความสูงให้กล้อง
-            targetPosition.z -= 10f; // กำหนดระยะห่างจากผู้เล่น
-
-            clientCamera.transform.position = targetPosition;
-            clientCamera.transform.LookAt(clientPlayer); // ให้กล้องมองผู้เล่น Client
+            SetCameraFollow(clientPlayer);
         }
+    }
+
+    public void SetPlayer(GameObject player)
+    {
+        if (player == null) return;
+
+        if (NetworkManager.Singleton.IsHost)
+        {
+            hostPlayer = player;
+        }
+        else if (NetworkManager.Singleton.IsClient)
+        {
+            clientPlayer = player;
+        }
+
+        SetCameraFollow(player);
+    }
+
+    private void SetCameraFollow(GameObject player)
+    {
+        if (player == null || cinemachineCamera == null) return;
+
+        cinemachineCamera.Follow = player.transform;
+        cinemachineCamera.LookAt = player.transform;
+
+        // ใช้ Framing Transposer เพื่อควบคุมมุมกล้อง
+        var transposer = cinemachineCamera.GetCinemachineComponent<CinemachineFramingTransposer>();
+        if (transposer != null)
+        {
+            transposer.m_CameraDistance = 10f;
+            transposer.m_TrackedObjectOffset = new Vector3(0, 3, 0); // สูงขึ้นจากตัวละคร
+            transposer.m_XDamping = 1.0f;
+            transposer.m_YDamping = 1.0f;
+            transposer.m_ZDamping = 1.0f;
+        }
+
+        // หมุนกล้องให้มีมุมเงยขึ้น 30 องศา
+        cinemachineCamera.transform.rotation = Quaternion.Euler(cameraRotation);
     }
 }
