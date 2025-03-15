@@ -33,7 +33,7 @@ public class BombSpawnerScript : NetworkBehaviour
         }
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     void SpawnBombServerRpc(Vector3 spawnPos)
     {
         Quaternion spawnRot = Quaternion.identity;
@@ -52,7 +52,9 @@ public class BombSpawnerScript : NetworkBehaviour
         rb.drag = 0f;          // ไม่มีแรงต้านอากาศ
         rb.angularDrag = 0.05f;// ค่าแรงต้านการหมุน
 
-        bomb.GetComponent<NetworkObject>().Spawn(true);
+        NetworkObject networkObject = bomb.GetComponent<NetworkObject>();
+        networkObject.Spawn(); // Spawn ให้กับ client
+
         spawnedBomb.Add(bomb);
         bomb.GetComponent<BombScript>().bombSpawner = this;
     }

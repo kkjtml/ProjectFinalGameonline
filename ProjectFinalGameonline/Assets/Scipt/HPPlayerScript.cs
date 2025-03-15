@@ -65,38 +65,28 @@ public class HPPlayerScript : NetworkBehaviour
             }
             gameObject.GetComponent<PlayerSpawnerScript>().Respawn();
         }
-        else if (collision.gameObject.tag == "Bomb")
+        else if (collision.gameObject.CompareTag("Bomb"))
         {
             if (IsOwnedByServer)
             {
-                // เช็คว่า hpP1 ลดลงได้จริง
+                // ลด HP ของ P1
                 if (hpP1.Value > 0)
                 {
-                    hpP1.Value--;
+                    DecreaseHPServerRpc(1, true); // ลด HP P1
                     ownerNetworkAnimationScript.SetTrigger("Hurt");
-                    if (hpP1.Value <= 0)
-                    {
-                        ownerNetworkAnimationScript.SetTrigger("Dead");
-                        RespawnPlayer();  // เรียก respawn เมื่อ HP = 0
-                    }
                 }
             }
             else
             {
-                // เช็คว่า hpP2 ลดลงได้จริง
+                // ลด HP ของ P2
                 if (hpP2.Value > 0)
                 {
-                    hpP2.Value--;
+                    DecreaseHPServerRpc(1, false); // ลด HP P2
                     ownerNetworkAnimationScript.SetTrigger("Hurt");
-                    if (hpP2.Value <= 0)
-                    {
-                        ownerNetworkAnimationScript.SetTrigger("Dead");
-                        RespawnPlayer();  // เรียก respawn เมื่อ HP = 0
-                    }
                 }
             }
         }
-        else if (collision.gameObject.tag == "Heart")
+        else if (collision.gameObject.CompareTag("Heart"))
         {
             if (IsOwnedByServer)
             {
@@ -111,10 +101,33 @@ public class HPPlayerScript : NetworkBehaviour
         }
     }
 
-    public void RespawnPlayer()  //ฟังก์ชันให้ผู้เล่น respawn ที่ตำแหน่งที่เคยเกิด
+    [ServerRpc]
+    void DecreaseHPServerRpc(int damage, bool isPlayer1)
+    {
+        if (isPlayer1)
+        {
+            hpP1.Value -= damage;
+            if (hpP1.Value <= 0)
+            {
+                ownerNetworkAnimationScript.SetTrigger("Dead");
+                RespawnPlayer();
+            }
+        }
+        else
+        {
+            hpP2.Value -= damage;
+            if (hpP2.Value <= 0)
+            {
+                ownerNetworkAnimationScript.SetTrigger("Dead");
+                RespawnPlayer();
+            }
+        }
+    }
+
+    public void RespawnPlayer() // ฟังก์ชันให้ผู้เล่น respawn ที่ตำแหน่งที่เคยเกิด
     {
         Vector3 spawnPos = LoginManagerScipt.Instance.lastSpawnPosition;  // Retrieve spawn position from LoginManager
-        transform.position = spawnPosition;
+        transform.position = spawnPos; // รีเซ็ตตำแหน่งผู้เล่น
 
         // รีเซ็ตค่า HP ให้กลับไปเป็น 5
         if (IsOwnedByServer)
