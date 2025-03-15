@@ -26,8 +26,7 @@ public class PlayerSpawnerScript : NetworkBehaviour
 
     private Vector3 GetRandomPos()
     {
-        Vector3 randPos = new Vector3(Random.Range(-3f, 3f), 1f, Random.Range(-3f, 3f));
-        return randPos;
+        return LoginManagerScipt.Instance.lastSpawnPosition;
     }
 
     public void Respawn()
@@ -47,12 +46,12 @@ public class PlayerSpawnerScript : NetworkBehaviour
     {
         StartCoroutine(RespawnCoroutine(spawnPos));
     }
-    
+
     IEnumerator RespawnCoroutine(Vector3 spawnPos)
     {
         SetPlayerState(false);
 
-         // ปิด Interpolation ก่อนเปลี่ยนตำแหน่ง
+        // ปิด Interpolation ก่อนเปลี่ยนตำแหน่ง
         if (clientNetworkTransform != null)
         {
             clientNetworkTransform.Interpolate = false;

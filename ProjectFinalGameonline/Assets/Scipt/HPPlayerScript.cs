@@ -18,8 +18,6 @@ public class HPPlayerScript : NetworkBehaviour
 
     private OwnerNetworkAnimationScript ownerNetworkAnimationScript;
 
-    private Vector3 spawnPosition; //เก็บตำแหน่ง spawn
-
     // Start is called before the first frame update
     void Start()
     {
@@ -27,9 +25,6 @@ public class HPPlayerScript : NetworkBehaviour
         p2Text = GameObject.Find("P2HPText (TMP)").GetComponent<TMP_Text>();
         mainPlayer = GetComponent<MainPlayerMovement>();
         ownerNetworkAnimationScript = GetComponent<OwnerNetworkAnimationScript>();
-
-
-        spawnPosition = transform.position; // เก็บตำแหน่ง spawn เริ่มต้น
     }
 
     private void UpdatePlayerNameAndScore()
@@ -66,28 +61,32 @@ public class HPPlayerScript : NetworkBehaviour
             }
             gameObject.GetComponent<PlayerSpawnerScript>().Respawn();
         }
-        else if (collision.gameObject.CompareTag("Bomb"))
+        else if (collision.gameObject.tag == "Bomb")
         {
             if (IsOwnedByServer)
             {
-                // ลด HP ของ P1
-                if (hpP1.Value > 0)
+                hpP1.Value--;
+                if (hpP1.Value <= 0)
                 {
-                    DecreaseHPServerRpc(1, true); // ลด HP P1
-                    ownerNetworkAnimationScript.SetTrigger("Hurt");
+                    ownerNetworkAnimationScript.SetTrigger("Dead");
+                    gameObject.GetComponent<PlayerSpawnerScript>().Respawn();
+                    hpP1.Value = 5;
                 }
+                ownerNetworkAnimationScript.SetTrigger("Hurt");
             }
             else
             {
-                // ลด HP ของ P2
-                if (hpP2.Value > 0)
+                hpP2.Value--;
+                if (hpP2.Value <= 0)
                 {
-                    DecreaseHPServerRpc(1, false); // ลด HP P2
-                    ownerNetworkAnimationScript.SetTrigger("Hurt");
+                    ownerNetworkAnimationScript.SetTrigger("Dead");
+                    gameObject.GetComponent<PlayerSpawnerScript>().Respawn();
+                    hpP2.Value = 5;
                 }
+                ownerNetworkAnimationScript.SetTrigger("Hurt");
             }
         }
-        else if (collision.gameObject.CompareTag("Heart"))
+        else if (collision.gameObject.tag == "Heart")
         {
             if (IsOwnedByServer)
             {
@@ -100,63 +99,5 @@ public class HPPlayerScript : NetworkBehaviour
                 ownerNetworkAnimationScript.SetTrigger("Glad");
             }
         }
-    }
-
-    public void RespawnPlayer() // ฟังก์ชันให้ผู้เล่น respawn ที่ตำแหน่งที่เคยเกิด
-    {
-        Vector3 spawnPos = LoginManagerScipt.Instance.lastSpawnPosition;  // Retrieve spawn position from LoginManager
-        transform.position = spawnPos; // รีเซ็ตตำแหน่งผู้เล่น
-
-        // รีเซ็ตค่า HP ให้กลับไปเป็น 5
-        if (IsOwnedByServer)
-        {
-            hpP1.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 1
-        }
-        else
-        {
-            hpP2.Value = 5;  // ตั้งค่า HP ของผู้เล่นคนที่ 2
-        }
-
-        // หยุดแอนิเมชัน "Dead" ถ้า HP มากกว่า 0
-        ownerNetworkAnimationScript.ResetTrigger("Dead");
-    }
-
-    [ClientRpc]
-    public void UpdateHPClientRpc(int playerId, int newHP)
-    {
-        if (playerId == 1)
-        {
-            hpP1.Value = newHP;
-            p1Text.text = $"{mainPlayer.playerNameA.Value} : {hpP1.Value}";
-        }
-        else
-        {
-            hpP2.Value = newHP;
-            p2Text.text = $"{mainPlayer.playerNameB.Value} : {hpP2.Value}";
-        }
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void DecreaseHPServerRpc(int damage, bool isPlayer1)
-    {
-        if (isPlayer1)
-        {
-            hpP1.Value -= damage;
-            if (hpP1.Value <= 0)
-            {
-                ownerNetworkAnimationScript.SetTrigger("Dead");
-                RespawnPlayer();
-            }
-        }
-        else
-        {
-            hpP2.Value -= damage;
-            if (hpP2.Value <= 0)
-            {
-                ownerNetworkAnimationScript.SetTrigger("Dead");
-                RespawnPlayer();
-            }
-        }
-        UpdateHPClientRpc(isPlayer1? 1 : 2, isPlayer1? hpP1.Value : hpP2.Value);
     }
 }

@@ -272,6 +272,13 @@ public class LoginManagerScipt : MonoBehaviour
             {
                 // เลือกตำแหน่งเกิดใหม่
                 GameObject spawnPointNow = SelectSpawn();
+
+                // ตรวจสอบว่าตำแหน่งนี้ถูกใช้งานแล้วหรือไม่
+                while (IsSpawnPositionOccupied(spawnPointNow.transform.position))
+                {
+                    spawnPointNow = SelectSpawn();  // เลือกตำแหน่งใหม่ถ้าเดิมถูกใช้
+                }
+
                 spawnPos = spawnPointNow.transform.position;
                 spawnRot = Quaternion.Euler(0f, 225f, 0f);
 
@@ -283,19 +290,43 @@ public class LoginManagerScipt : MonoBehaviour
             {
                 // ใช้ตำแหน่งเกิดล่าสุด
                 spawnPos = lastSpawnPosition;
-                lastSpawnPosition = spawnPos; // เก็บตำแหน่ง spawn
             }
         }
         else
         {
             // สำหรับผู้เล่นคนอื่น ๆ
             GameObject spawnPointNow = SelectSpawn();
+
+            // ตรวจสอบว่าตำแหน่งนี้ถูกใช้งานแล้วหรือไม่
+            while (IsSpawnPositionOccupied(spawnPointNow.transform.position))
+            {
+                spawnPointNow = SelectSpawn();  // เลือกตำแหน่งใหม่ถ้าเดิมถูกใช้
+            }
+
             spawnPos = spawnPointNow.transform.position;
             spawnRot = Quaternion.Euler(0f, 225f, 0f);
         }
 
         response.Position = spawnPos;
         response.Rotation = spawnRot;
+    }
+
+    // ฟังก์ชันตรวจสอบว่าตำแหน่งถูกใช้งานแล้วหรือไม่
+    private bool IsSpawnPositionOccupied(Vector3 position)
+    {
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (client.PlayerObject != null)
+            {
+                Vector3 playerPosition = client.PlayerObject.transform.position;
+                // ถ้าผู้เล่นคนอื่นอยู่ที่ตำแหน่งเดียวกันกับตำแหน่ง spawn
+                if (Vector3.Distance(playerPosition, position) < 1f)  // ระยะห่าง 1 หน่วย
+                {
+                    return true;  // ตำแหน่งถูกใช้แล้ว
+                }
+            }
+        }
+        return false;  // ตำแหน่งยังไม่ถูกใช้
     }
 
     private GameObject SelectSpawn()
