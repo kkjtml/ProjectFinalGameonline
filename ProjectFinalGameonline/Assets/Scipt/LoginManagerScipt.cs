@@ -30,11 +30,6 @@ public class LoginManagerScipt : MonoBehaviour
     public string joinCode;
     public TMP_Text joinCodeDisplayText;
 
-    // เพิ่มตัวแปรกล้อง
-    public Camera hostCamera; // กล้องสำหรับ Host
-    public Camera clientCamera; // กล้องสำหรับ Client
-    private Transform playerTransform;
-
     private void Awake()
     {
         if (Instance == null)
@@ -296,39 +291,6 @@ public class LoginManagerScipt : MonoBehaviour
         if (joinCodeDisplayText != null)
         {
             joinCodeDisplayText.text = joinCode;
-        }
-    }
-
-    private void Update() // เพิ่มการติดตามกล้อง
-    {
-        if (NetworkManager.Singleton.IsHost)
-        {
-            if (playerTransform == null)
-            {
-                playerTransform = spawnPoint[0].transform; // กำหนดตำแหน่งของผู้เล่น Host
-            }
-            FollowPlayer(hostCamera);
-        }
-        else if (NetworkManager.Singleton.IsClient)
-        {
-            if (playerTransform == null)
-            {
-                playerTransform = spawnPoint[1].transform; // กำหนดตำแหน่งของผู้เล่น Client
-            }
-            FollowPlayer(clientCamera);
-        }
-    }
-
-    private void FollowPlayer(Camera camera) // เพิ่มการติดตามกล้อง
-    {
-        if (camera != null && playerTransform != null)
-        {
-            Vector3 targetPosition = playerTransform.position;
-            targetPosition.y += 5f; // กำหนดความสูงของกล้อง
-            targetPosition.z -= 10f; // กำหนดระยะห่างจากตัวละคร
-
-            camera.transform.position = targetPosition;
-            camera.transform.LookAt(playerTransform); // ทำให้กล้องมองตัวละคร
         }
     }
 }
