@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Homework03 - Copy.sln"
+    "dotnet.defaultSolution": "ProjectFinalGameonline.sln"
 }

@@ -8,39 +8,53 @@ public class BombSpawnerScript : NetworkBehaviour
 {
     public GameObject bombPrefab;
     private List<GameObject> spawnedBomb = new List<GameObject>();
-    // public float spawnRadius = 5.0f;
     private OwnerNetworkAnimationScript ownerNetworkAnimationScript;
 
     void Start()
     {
         ownerNetworkAnimationScript = GetComponent<OwnerNetworkAnimationScript>();
+        if (IsServer) // ให้เซิร์ฟเวอร์เริ่มสุ่มเกิดระเบิด
+        {
+            StartCoroutine(SpawnBombRoutine());
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    IEnumerator SpawnBombRoutine()
     {
-        if (!IsOwner) return;
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        while (true)
         {
-            ownerNetworkAnimationScript.SetTrigger("PuttingDown");
-            SpawnBombServerRpc(OwnerClientId);
+            yield return new WaitForSeconds(2f); // Spawn ทุก 2 วินาที
+
+            float randomX = Random.Range(-1f, 1.0f);
+            float randomZ = Random.Range(0f, 1.0f);
+            Vector3 spawnPos = transform.position + new Vector3(randomX, 10f, randomZ);
+
+            SpawnBombServerRpc(spawnPos);
         }
     }
 
     [ServerRpc]
-    void SpawnBombServerRpc(ulong clientId)
+    void SpawnBombServerRpc(Vector3 spawnPos)
     {
-        // สุ่มตำแหน่งในระยะ spawnRadius
-        // Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
-        // Vector3 spawnPos = transform.position + new Vector3(randomOffset.x, 1.2f, randomOffset.y);
-        Vector3 spawnPos = transform.position + (transform.forward * 1.8f) + (transform.up * 0.8f);
-        Quaternion spawnRot = transform.rotation;
+        Quaternion spawnRot = Quaternion.identity;
         GameObject bomb = Instantiate(bombPrefab, spawnPos, spawnRot);
+
+        // ตรวจสอบว่ามี Rigidbody หรือไม่
+        Rigidbody rb = bomb.GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = bomb.AddComponent<Rigidbody>(); // ถ้าไม่มี ให้เพิ่ม Rigidbody เข้าไป
+        }
+
+        rb.useGravity = true;  // เปิดใช้งานแรงโน้มถ่วง
+        rb.isKinematic = false; // ปิด Kinematic เพื่อให้ Physics ทำงาน
+        rb.mass = 1.5f;          // ตั้งค่ามวลของระเบิด
+        rb.drag = 0f;          // ไม่มีแรงต้านอากาศ
+        rb.angularDrag = 0.05f;// ค่าแรงต้านการหมุน
+
+        bomb.GetComponent<NetworkObject>().Spawn(true);
         spawnedBomb.Add(bomb);
         bomb.GetComponent<BombScript>().bombSpawner = this;
-        bomb.GetComponent<NetworkObject>().Spawn(true);
-        //bomb.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
     }
 
     [ServerRpc(RequireOwnership = false)]
