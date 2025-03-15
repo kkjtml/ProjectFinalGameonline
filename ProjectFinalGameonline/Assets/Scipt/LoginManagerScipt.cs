@@ -17,9 +17,7 @@ public class LoginManagerScipt : MonoBehaviour
     public GameObject loginPanel;
     public GameObject leaveButton;
     public List<GameObject> spawnPoint = new List<GameObject>();
-    // แก้ไขเพื่อให้เก็บ lastSpawnPosition สำหรับผู้เล่น
     public NetworkVariable<Vector3> lastSpawnPosition = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
     public List<uint> AlternatePlayerPrefebs;
 
     public GameObject scorePanel;
@@ -265,45 +263,22 @@ public class LoginManagerScipt : MonoBehaviour
         Vector3 spawnPos = Vector3.zero;
         Quaternion spawnRot = Quaternion.identity;
 
-        // ถ้าคือผู้เล่นที่เราเป็นเจ้าของ
+        // ถ้าคือผู้เล่นที่เราเป็นเจ้าของ (Host)
         if (clientID == NetworkManager.Singleton.LocalClientId)
         {
-            // ถ้ายังไม่มีการเก็บตำแหน่งเกิด
-            if (lastSpawnPosition.Value == Vector3.zero)
-            {
-                // เลือกตำแหน่งเกิดใหม่
-                GameObject spawnPointNow = SelectSpawn();
+            // Host always spawns at spawn point 1 (index 0)
+            GameObject spawnPointNow = spawnPoint[0];
+            spawnPos = spawnPointNow.transform.position;
+            spawnRot = Quaternion.Euler(0f, 225f, 0f); // Use your desired rotation
 
-                // ตรวจสอบว่าตำแหน่งนี้ถูกใช้งานแล้วหรือไม่
-                while (IsSpawnPositionOccupied(spawnPointNow.transform.position))
-                {
-                    spawnPointNow = SelectSpawn();  // เลือกตำแหน่งใหม่ถ้าเดิมถูกใช้
-                }
-
-                spawnPos = spawnPointNow.transform.position;
-                spawnRot = Quaternion.Euler(0f, 225f, 0f);
-
-                lastSpawnPosition.Value = spawnPos; // เก็บตำแหน่งเกิด
-            }
-            else
-            {
-                // ใช้ตำแหน่งเกิดล่าสุด
-                spawnPos = lastSpawnPosition.Value;
-            }
+            lastSpawnPosition.Value = spawnPos; // Store spawn position for host
         }
         else
         {
-            // สำหรับผู้เล่นคนอื่น ๆ
-            GameObject spawnPointNow = SelectSpawn();
-
-            // ตรวจสอบว่าตำแหน่งนี้ถูกใช้งานแล้วหรือไม่
-            while (IsSpawnPositionOccupied(spawnPointNow.transform.position))
-            {
-                spawnPointNow = SelectSpawn();  // เลือกตำแหน่งใหม่ถ้าเดิมถูกใช้
-            }
-
+            // Client always spawns at spawn point 2 (index 1)
+            GameObject spawnPointNow = spawnPoint[1];
             spawnPos = spawnPointNow.transform.position;
-            spawnRot = Quaternion.Euler(0f, 225f, 0f);
+            spawnRot = Quaternion.Euler(0f, 225f, 0f); // Use your desired rotation
         }
 
         response.Position = spawnPos;

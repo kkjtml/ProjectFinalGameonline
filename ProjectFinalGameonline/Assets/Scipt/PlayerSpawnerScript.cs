@@ -26,7 +26,22 @@ public class PlayerSpawnerScript : NetworkBehaviour
 
     private Vector3 GetRandomPos()
     {
-        return LoginManagerScipt.Instance.lastSpawnPosition.Value;
+        // If you want to ensure the host and client have fixed spawn positions:
+        if (IsHost())
+        {
+            // Host always spawns at spawn point 1 (index 0)
+            return LoginManagerScipt.Instance.spawnPoint[0].transform.position;
+        }
+        else
+        {
+            // Client always spawns at spawn point 2 (index 1)
+            return LoginManagerScipt.Instance.spawnPoint[1].transform.position;
+        }
+    }
+
+    private bool IsHost()
+    {
+        return NetworkManager.Singleton.IsHost;
     }
 
     public void Respawn()

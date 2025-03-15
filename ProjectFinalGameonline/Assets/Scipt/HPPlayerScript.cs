@@ -68,7 +68,7 @@ public class HPPlayerScript : NetworkBehaviour
                 hpP1.Value--;
                 if (hpP1.Value <= 0)
                 {
-                    ownerNetworkAnimationScript.SetTrigger("Dead");
+                    // ownerNetworkAnimationScript.SetTrigger("Dead");
                     gameObject.GetComponent<PlayerSpawnerScript>().Respawn();
                     hpP1.Value = 5;
                 }
@@ -79,7 +79,7 @@ public class HPPlayerScript : NetworkBehaviour
                 hpP2.Value--;
                 if (hpP2.Value <= 0)
                 {
-                    ownerNetworkAnimationScript.SetTrigger("Dead");
+                    // ownerNetworkAnimationScript.SetTrigger("Dead");
                     gameObject.GetComponent<PlayerSpawnerScript>().Respawn();
                     hpP2.Value = 5;
                 }
