@@ -17,8 +17,9 @@ public class LoginManagerScipt : MonoBehaviour
     public GameObject loginPanel;
     public GameObject leaveButton;
     public List<GameObject> spawnPoint = new List<GameObject>();
-    // เพิ่ม property เพื่อให้สามารถเข้าถึง lastSpawnPosition ได้
-    public Vector3 lastSpawnPosition { get; private set; } // ทำให้สามารถอ่านค่าได้
+    // แก้ไขเพื่อให้เก็บ lastSpawnPosition สำหรับผู้เล่น
+    public NetworkVariable<Vector3> lastSpawnPosition = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     public List<uint> AlternatePlayerPrefebs;
 
     public GameObject scorePanel;
@@ -268,7 +269,7 @@ public class LoginManagerScipt : MonoBehaviour
         if (clientID == NetworkManager.Singleton.LocalClientId)
         {
             // ถ้ายังไม่มีการเก็บตำแหน่งเกิด
-            if (lastSpawnPosition == Vector3.zero)
+            if (lastSpawnPosition.Value == Vector3.zero)
             {
                 // เลือกตำแหน่งเกิดใหม่
                 GameObject spawnPointNow = SelectSpawn();
@@ -282,14 +283,12 @@ public class LoginManagerScipt : MonoBehaviour
                 spawnPos = spawnPointNow.transform.position;
                 spawnRot = Quaternion.Euler(0f, 225f, 0f);
 
-                // เก็บตำแหน่งเกิดไว้สำหรับการเกิดครั้งถัดไป
-                lastSpawnPosition = spawnPos;
-                lastSpawnPosition = spawnPos; // เก็บตำแหน่ง spawn
+                lastSpawnPosition.Value = spawnPos; // เก็บตำแหน่งเกิด
             }
             else
             {
                 // ใช้ตำแหน่งเกิดล่าสุด
-                spawnPos = lastSpawnPosition;
+                spawnPos = lastSpawnPosition.Value;
             }
         }
         else

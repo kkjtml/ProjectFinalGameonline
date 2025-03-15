@@ -26,7 +26,7 @@ public class PlayerSpawnerScript : NetworkBehaviour
 
     private Vector3 GetRandomPos()
     {
-        return LoginManagerScipt.Instance.lastSpawnPosition;
+        return LoginManagerScipt.Instance.lastSpawnPosition.Value;
     }
 
     public void Respawn()
