@@ -280,8 +280,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16ef716eb39165842872d85d35a29315, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
-  rotationSpeed: 10
   namePrefab: {fileID: 469099481093789672, guid: a487622fd8acff24bb825e7a7957a449, type: 3}
   eyeRenderer: {fileID: 4251826903237059122}
   defaultEyeTexture: {fileID: 2800000, guid: 557a7eabd7354b24caf6a1a91aed6d5d, type: 3}

@@ -9,8 +9,8 @@ using Unity.Collections;
 
 public class MainPlayerMovement : NetworkBehaviour
 {
-    public float speed = 20.0f;
-    public float rotationSpeed = 5.0f;
+    // public float speed = 20.0f;
+    // public float rotationSpeed = 5.0f;
     Rigidbody rb;
 
     public TMP_Text namePrefab;

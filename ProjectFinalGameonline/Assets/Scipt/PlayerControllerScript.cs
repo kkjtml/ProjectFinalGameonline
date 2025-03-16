@@ -16,10 +16,13 @@ public class PlayerControllerScript : NetworkBehaviour
 
     void Start()
     {
-        speed = 15.0f;
+        speed = 20.0f;
         rotationSpeed = 5.0f;
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+
+        rb.interpolation = RigidbodyInterpolation.Interpolate; // ตั้งค่า Interpolate เพื่อให้การเคลื่อนที่นุ่มนวลขึ้น
+        // rb.collisionDetectionMode = CollisionDetectionMode.Continuous; // ตั้งค่า collision detection
         running = false;
     }
 
@@ -29,13 +32,12 @@ public class PlayerControllerScript : NetworkBehaviour
         float verticalInput = Input.GetAxis("Vertical");
         if (Mathf.Abs(verticalInput) > 0.01f)
         {
+            // move forward only
             if (verticalInput > 0.01f)
             {
-                // float translation = verticalInput * speed;
-                // translation *= Time.fixedDeltaTime;
-                // rb.MovePosition(rb.position + this.transform.forward * translation);
-                Vector3 moveDir = transform.forward * speed;
-                rb.velocity = new Vector3(moveDir.x, rb.velocity.y, moveDir.z); // ให้เคลื่อนที่แบบลื่นไหล
+                Vector3 moveDirection = transform.forward * verticalInput * speed;
+                moveDirection.y = rb.velocity.y;
+                rb.velocity = moveDirection;
 
                 if (!running)
                 {
@@ -44,19 +46,11 @@ public class PlayerControllerScript : NetworkBehaviour
                 }
             }
         }
-        // else if (running)
-        // {
-        //     running = false;
-        //     animator.SetBool("Running", false);
-        // }
-        else
+        else if (running)
         {
-            rb.velocity = new Vector3(0, rb.velocity.y, 0); // หยุดเคลื่อนที่เมื่อไม่มีการกดปุ่ม
-            if (running)
-            {
-                running = false;
-                animator.SetBool("Running", false);
-            }
+            rb.velocity = new Vector3(0, rb.velocity.y, 0); 
+            running = false;
+            animator.SetBool("Running", false);
         }
     }
 
