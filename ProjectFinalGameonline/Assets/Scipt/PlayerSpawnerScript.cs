@@ -16,8 +16,20 @@ public class PlayerSpawnerScript : NetworkBehaviour
     {
         //mainPlayer = gameObject.GetComponent<MainPlayerScript>();
         renderers = GetComponentsInChildren<Renderer>();
-        clientNetworkTransform = GetComponent<ClientNetworkTransform>(); // ดึง Component มาใช้
+        clientNetworkTransform = GetComponent<ClientNetworkTransform>();
     }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        // ให้เฉพาะ Owner เท่านั้นที่ตั้งค่ากล้องของตัวเอง
+        if (IsOwner)
+        {
+            CameraManager.Instance.SetPlayer(gameObject);
+        }
+    }
+    
     void SetPlayerState(bool state)
     {
         foreach (var script in scripts) { script.enabled = state; }

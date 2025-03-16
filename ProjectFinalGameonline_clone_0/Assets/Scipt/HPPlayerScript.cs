@@ -86,18 +86,18 @@ public class HPPlayerScript : NetworkBehaviour
                 ownerNetworkAnimationScript.SetTrigger("Hurt");
             }
         }
-        else if (collision.gameObject.tag == "Heart")
-        {
-            if (IsOwnedByServer)
-            {
-                hpP1.Value++;
-                ownerNetworkAnimationScript.SetTrigger("Glad");
-            }
-            else
-            {
-                hpP2.Value++;
-                ownerNetworkAnimationScript.SetTrigger("Glad");
-            }
-        }
+        // else if (collision.gameObject.tag == "Heart")
+        // {
+        //     if (IsOwnedByServer)
+        //     {
+        //         hpP1.Value++;
+        //         ownerNetworkAnimationScript.SetTrigger("Glad");
+        //     }
+        //     else
+        //     {
+        //         hpP2.Value++;
+        //         ownerNetworkAnimationScript.SetTrigger("Glad");
+        //     }
+        // }
     }
 }
