@@ -9,8 +9,8 @@ using Unity.Collections;
 
 public class MainPlayerMovement : NetworkBehaviour
 {
-    public float speed = 5.0f;
-    public float rotationSpeed = 10.0f;
+    public float speed = 20.0f;
+    public float rotationSpeed = 5.0f;
     Rigidbody rb;
 
     public TMP_Text namePrefab;
@@ -134,13 +134,6 @@ public class MainPlayerMovement : NetworkBehaviour
             {
                 RequestToggleEyeTextureServerRpc();
             }
-
-            // if (Input.GetKeyDown(KeyCode.L))
-            // {
-            //     ClientRpcSendParams clientRpcSendParams = new ClientRpcSendParams { TargetClientIds = new List<ulong> { 1 } };
-            //     ClientRpcParams clientRpcParams = new ClientRpcParams { Send = clientRpcSendParams };
-            //     TestClientRpc("Hello, this is server", clientRpcParams);
-            // }
         }
 
         UpdatePlayerInfo();

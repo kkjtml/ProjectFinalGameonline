@@ -23,10 +23,10 @@ public class BombSpawnerScript : NetworkBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(2f); // Spawn ทุก 2 วินาที
+            yield return new WaitForSeconds(2f); // Spawn ทุก 1 วินาที
 
             float randomX = Random.Range(-1f, 1.0f);
-            float randomZ = Random.Range(0f, 1.0f);
+            float randomZ = Random.Range(25.0f, 26.0f);
             Vector3 spawnPos = transform.position + new Vector3(randomX, 10f, randomZ);
 
             SpawnBombServerRpc(spawnPos);
